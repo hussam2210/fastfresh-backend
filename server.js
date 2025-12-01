@@ -3,7 +3,20 @@ const cors = require("cors");
 const admin = require("firebase-admin");
 const dotenv = require("dotenv");
 dotenv.config();
-const serviceAccount = require("./serviceAccountKey.json");
+const express = require("express");
+const cors = require("cors");
+const admin = require("firebase-admin");
+const dotenv = require("dotenv");
+dotenv.config();
+
+// اقرأ مفتاح فايربيس من المتغيّر SERVICE_ACCOUNT_JSON
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_JSON);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 const app = express();
