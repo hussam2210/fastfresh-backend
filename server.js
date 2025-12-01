@@ -5,33 +5,42 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-// اقرأ مفتاح فايربيس من الـ ENV
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT_JSON);
+// --- Firebase Admin from ENV ---
+const rawServiceAccount = process.env.SERVICE_ACCOUNT_JSON;
 
-// تهيئة Firebase Admin
+if (!rawServiceAccount) {
+  console.error("SERVICE_ACCOUNT_JSON is not set");
+  process.exit(1);
+}
+
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(rawServiceAccount);
+} catch (e) {
+  console.error("Failed to parse SERVICE_ACCOUNT_JSON:", e.message);
+  process.exit(1);
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
 
-// إنشاء تطبيق Express
+// --- Express app ---
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// استيراد المسارات
+// Routes
 const authRoutes = require("./routes/auth");
 const orderRoutes = require("./routes/orders");
 
-// استخدام المسارات
 app.use("/api/auth", authRoutes(db));
 app.use("/api/orders", orderRoutes(db));
 
-// تشغيل السيرفر
+// Start server
 const PORT = process.env.PORT || 8080;
-
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
